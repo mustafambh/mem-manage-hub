@@ -155,13 +155,16 @@ function SubscriptionsPage() {
               <TableHead className="text-right">من</TableHead>
               <TableHead className="text-right">إلى</TableHead>
               <TableHead className="text-right">الحالة</TableHead>
+              <TableHead className="text-right">تغيير الحالة</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {subs.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">لا توجد اشتراكات</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">لا توجد اشتراكات</TableCell></TableRow>
             ) : subs.map((s: any) => {
               const expired = s.end_date < todayStr;
+              const displayStatus = s.status === "active" && expired ? "expired" : s.status;
+              const isActiveLike = displayStatus === "active";
               return (
                 <TableRow key={s.id}>
                   <TableCell className="font-medium">{s.members?.full_name}</TableCell>
@@ -169,9 +172,29 @@ function SubscriptionsPage() {
                   <TableCell>{s.start_date}</TableCell>
                   <TableCell>{s.end_date}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${expired ? "bg-destructive/10 text-destructive" : "bg-success/10 text-success"}`}>
-                      {expired ? "منتهٍ" : "نشط"}
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${isActiveLike ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>
+                      {STATUS_LABELS[displayStatus] ?? displayStatus}
                     </span>
+                  </TableCell>
+                  <TableCell>
+                    <Select
+                      value={s.status}
+                      onValueChange={async (v) => {
+                        const { error } = await supabase.from("subscriptions").update({ status: v }).eq("id", s.id);
+                        if (error) return toast.error(error.message);
+                        toast.success("تم تحديث الحالة");
+                        qc.invalidateQueries({ queryKey: ["subscriptions"] });
+                        qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+                      }}
+                    >
+                      <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">نشط</SelectItem>
+                        <SelectItem value="expired">منتهٍ</SelectItem>
+                        <SelectItem value="frozen">مجمد</SelectItem>
+                        <SelectItem value="cancelled">ملغى</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                 </TableRow>
               );
