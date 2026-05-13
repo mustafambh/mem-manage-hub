@@ -215,6 +215,23 @@ function SubscriptionsPage() {
           </TableBody>
         </Table>
       </Card>
+
+      <AlertDialog open={!!pendingStatus} onOpenChange={(o) => !o && setPendingStatus(null)}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>تأكيد تغيير الحالة</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل تريد تغيير حالة اشتراك <span className="font-semibold text-foreground">{pendingStatus?.memberName}</span> من{" "}
+              <span className="font-semibold text-foreground">{STATUS_LABELS[pendingStatus?.currentStatus ?? ""] ?? pendingStatus?.currentStatus}</span> إلى{" "}
+              <span className="font-semibold text-foreground">{STATUS_LABELS[pendingStatus?.status ?? ""] ?? pendingStatus?.status}</span>؟
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmStatusChange} className="gradient-primary shadow-glow">تأكيد</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
