@@ -195,12 +195,9 @@ function SubscriptionsPage() {
                   <TableCell>
                     <Select
                       value={s.status}
-                      onValueChange={async (v) => {
-                        const { error } = await supabase.from("subscriptions").update({ status: v }).eq("id", s.id);
-                        if (error) return toast.error(error.message);
-                        toast.success("تم تحديث الحالة");
-                        qc.invalidateQueries({ queryKey: ["subscriptions"] });
-                        qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+                      onValueChange={(v) => {
+                        if (v === s.status) return;
+                        setPendingStatus({ id: s.id, status: v, memberName: s.members?.full_name ?? "", currentStatus: s.status });
                       }}
                     >
                       <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
