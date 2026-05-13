@@ -12,6 +12,13 @@ import { useState } from "react";
 import { CalendarCheck, Plus } from "lucide-react";
 import { toast } from "sonner";
 
+const STATUS_LABELS: Record<string, string> = {
+  active: "نشط",
+  expired: "منتهٍ",
+  cancelled: "ملغى",
+  frozen: "مجمد",
+};
+
 export const Route = createFileRoute("/_authenticated/subscriptions")({
   component: SubscriptionsPage,
 });
