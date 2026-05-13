@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useState } from "react";
 import { CalendarCheck, Plus } from "lucide-react";
@@ -27,6 +28,21 @@ function SubscriptionsPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ member_id: "", package_id: "", start_date: new Date().toISOString().slice(0, 10), record_payment: true, method: "cash" });
+  const [pendingStatus, setPendingStatus] = useState<{ id: string; status: string; memberName: string; currentStatus: string } | null>(null);
+
+  const confirmStatusChange = async () => {
+    if (!pendingStatus) return;
+    const { error } = await supabase.from("subscriptions").update({ status: pendingStatus.status }).eq("id", pendingStatus.id);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("تم تحديث الحالة");
+      qc.invalidateQueries({ queryKey: ["subscriptions"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+    }
+    setPendingStatus(null);
+  };
+
 
   const { data: subs = [] } = useQuery({
     queryKey: ["subscriptions"],
@@ -179,12 +195,9 @@ function SubscriptionsPage() {
                   <TableCell>
                     <Select
                       value={s.status}
-                      onValueChange={async (v) => {
-                        const { error } = await supabase.from("subscriptions").update({ status: v }).eq("id", s.id);
-                        if (error) return toast.error(error.message);
-                        toast.success("تم تحديث الحالة");
-                        qc.invalidateQueries({ queryKey: ["subscriptions"] });
-                        qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+                      onValueChange={(v) => {
+                        if (v === s.status) return;
+                        setPendingStatus({ id: s.id, status: v, memberName: s.members?.full_name ?? "", currentStatus: s.status });
                       }}
                     >
                       <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
@@ -202,6 +215,23 @@ function SubscriptionsPage() {
           </TableBody>
         </Table>
       </Card>
+
+      <AlertDialog open={!!pendingStatus} onOpenChange={(o) => !o && setPendingStatus(null)}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>تأكيد تغيير الحالة</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل تريد تغيير حالة اشتراك <span className="font-semibold text-foreground">{pendingStatus?.memberName}</span> من{" "}
+              <span className="font-semibold text-foreground">{STATUS_LABELS[pendingStatus?.currentStatus ?? ""] ?? pendingStatus?.currentStatus}</span> إلى{" "}
+              <span className="font-semibold text-foreground">{STATUS_LABELS[pendingStatus?.status ?? ""] ?? pendingStatus?.status}</span>؟
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmStatusChange} className="gradient-primary shadow-glow">تأكيد</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
