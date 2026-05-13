@@ -28,6 +28,21 @@ function SubscriptionsPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ member_id: "", package_id: "", start_date: new Date().toISOString().slice(0, 10), record_payment: true, method: "cash" });
+  const [pendingStatus, setPendingStatus] = useState<{ id: string; status: string; memberName: string; currentStatus: string } | null>(null);
+
+  const confirmStatusChange = async () => {
+    if (!pendingStatus) return;
+    const { error } = await supabase.from("subscriptions").update({ status: pendingStatus.status }).eq("id", pendingStatus.id);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("تم تحديث الحالة");
+      qc.invalidateQueries({ queryKey: ["subscriptions"] });
+      qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+    }
+    setPendingStatus(null);
+  };
+
 
   const { data: subs = [] } = useQuery({
     queryKey: ["subscriptions"],
