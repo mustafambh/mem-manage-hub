@@ -77,10 +77,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "نظام متكامل لإدارة اشتراكات الأعضاء للنوادي والمسابح والأكاديميات" },
       { name: "author", content: "Subs" },
       { property: "og:title", content: "نظام إدارة الاشتراكات" },
-      { property: "og:description", content: "نظام متكامل لإدارة الأعضاء، الباقات، الاشتراكات، والمدفوعات" },
+      { property: "og:description", content: "نظام متكامل لإدارة اشتراكات الأعضاء للنوادي والمسابح والأكاديميات" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "نظام إدارة الاشتراكات" },
+      { name: "twitter:description", content: "نظام متكامل لإدارة اشتراكات الأعضاء للنوادي والمسابح والأكاديميات" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c82f5996-2e79-4c10-9ac0-67790c8be413/id-preview-9d20f09f--c064d908-eb9a-4c99-8691-4ff2ef4fbd92.lovable.app-1778937638223.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c82f5996-2e79-4c10-9ac0-67790c8be413/id-preview-9d20f09f--c064d908-eb9a-4c99-8691-4ff2ef4fbd92.lovable.app-1778937638223.png" },
     ],
     links: [
       {
