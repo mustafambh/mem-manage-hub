@@ -6,18 +6,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Activity } from "lucide-react";
+import { Activity, KeyRound } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
 });
 
+type Mode = "admin" | "staff";
+
 function LoginPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<Mode>("admin");
+
+  // admin
   const [email, setEmail] = useState("");
+  // staff
+  const [clubCode, setClubCode] = useState("");
+  const [username, setUsername] = useState("");
+  // shared
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -30,27 +37,16 @@ function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-            data: { full_name: fullName },
-          },
-        });
-        if (error) throw error;
-        toast.success("تم إنشاء الحساب بنجاح");
-        navigate({ to: "/" });
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        toast.success("مرحبًا بعودتك");
-        navigate({ to: "/" });
-      }
+      const loginEmail =
+        mode === "admin"
+          ? email.trim()
+          : `${username.trim().toLowerCase()}@${clubCode.trim().toLowerCase()}.local`;
+      const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
+      if (error) throw error;
+      toast.success("مرحبًا بعودتك");
+      navigate({ to: "/" });
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "خطأ غير متوقع";
-      toast.error(msg);
+      toast.error(err instanceof Error ? err.message : "خطأ غير متوقع");
     } finally {
       setLoading(false);
     }
@@ -64,63 +60,79 @@ function LoginPage() {
             <Activity className="w-8 h-8 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-bold text-gradient">نظام إدارة الاشتراكات</h1>
-          <p className="text-muted-foreground mt-2">للنوادي، المسابح، والأكاديميات</p>
+          <p className="text-muted-foreground mt-2">سجّل دخولك للمتابعة</p>
         </div>
 
         <Card className="p-6 shadow-card border-border/50">
           <div className="flex gap-2 mb-6 p-1 bg-muted rounded-lg">
             <button
               type="button"
-              onClick={() => setMode("signin")}
+              onClick={() => setMode("admin")}
               className={`flex-1 py-2 rounded-md text-sm font-medium transition ${
-                mode === "signin" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"
+                mode === "admin" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"
               }`}
             >
-              تسجيل الدخول
+              مدير نادي
             </button>
             <button
               type="button"
-              onClick={() => setMode("signup")}
+              onClick={() => setMode("staff")}
               className={`flex-1 py-2 rounded-md text-sm font-medium transition ${
-                mode === "signup" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"
+                mode === "staff" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"
               }`}
             >
-              حساب جديد
+              موظف
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === "signup" && (
+            {mode === "admin" ? (
               <div className="space-y-2">
-                <Label htmlFor="name">الاسم الكامل</Label>
+                <Label htmlFor="email">البريد الإلكتروني</Label>
                 <Input
-                  id="name"
+                  id="email"
+                  type="email"
                   required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="أدخل اسمك الكامل"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  dir="ltr"
                 />
               </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="code" className="flex items-center gap-2">
+                    <KeyRound className="w-4 h-4" /> رمز النادي
+                  </Label>
+                  <Input
+                    id="code"
+                    required
+                    value={clubCode}
+                    onChange={(e) => setClubCode(e.target.value)}
+                    placeholder="CLUB-..."
+                    dir="ltr"
+                    className="font-mono"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="username">اسم المستخدم</Label>
+                  <Input
+                    id="username"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    dir="ltr"
+                  />
+                </div>
+              </>
             )}
-            <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
-              <Input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
-                dir="ltr"
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="password">كلمة المرور</Label>
               <Input
                 id="password"
                 type="password"
                 required
-                minLength={6}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
@@ -129,19 +141,13 @@ function LoginPage() {
             </div>
 
             <Button type="submit" disabled={loading} className="w-full gradient-primary shadow-glow">
-              {loading ? "جارٍ المعالجة..." : mode === "signup" ? "إنشاء حساب" : "دخول"}
+              {loading ? "جارٍ الدخول..." : "دخول"}
             </Button>
           </form>
-
-          {mode === "signup" && (
-            <p className="text-xs text-muted-foreground mt-4 text-center">
-              أول مستخدم يتم تسجيله يصبح مديرًا تلقائيًا. باقي الحسابات تُسجّل كموظفين.
-            </p>
-          )}
         </Card>
 
         <p className="text-center text-sm text-muted-foreground mt-6">
-          <Link to="/" className="hover:text-primary">العودة للرئيسية</Link>
+          لديك رمز نادٍ جديد؟ <Link to="/signup" className="text-primary hover:underline">سجّل ناديك</Link>
         </p>
       </div>
     </div>

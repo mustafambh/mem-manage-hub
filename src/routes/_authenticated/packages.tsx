@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated/packages")({
 });
 
 function PackagesPage() {
-  const { isAdmin, loading } = useAuth();
+  const { isAdmin, loading, clubId } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -39,12 +39,14 @@ function PackagesPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!clubId) return toast.error("لم يتم تحديد النادي");
     const { error } = await supabase.from("packages").insert({
       name: form.name,
       price: Number(form.price),
       duration_days: Number(form.duration_days),
       description: form.description || null,
       is_active: form.is_active,
+      club_id: clubId,
     });
     if (error) return toast.error(error.message);
     toast.success("تمت إضافة الباقة");

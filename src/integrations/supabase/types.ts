@@ -14,9 +14,34 @@ export type Database = {
   }
   public: {
     Tables: {
+      clubs: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: []
+      }
       members: {
         Row: {
           birth_date: string | null
+          club_id: string
           created_at: string
           created_by: string | null
           email: string | null
@@ -29,6 +54,7 @@ export type Database = {
         }
         Insert: {
           birth_date?: string | null
+          club_id: string
           created_at?: string
           created_by?: string | null
           email?: string | null
@@ -41,6 +67,7 @@ export type Database = {
         }
         Update: {
           birth_date?: string | null
+          club_id?: string
           created_at?: string
           created_by?: string | null
           email?: string | null
@@ -51,10 +78,19 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "members_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       packages: {
         Row: {
+          club_id: string
           created_at: string
           description: string | null
           duration_days: number
@@ -64,6 +100,7 @@ export type Database = {
           price: number
         }
         Insert: {
+          club_id: string
           created_at?: string
           description?: string | null
           duration_days?: number
@@ -73,6 +110,7 @@ export type Database = {
           price?: number
         }
         Update: {
+          club_id?: string
           created_at?: string
           description?: string | null
           duration_days?: number
@@ -81,11 +119,20 @@ export type Database = {
           name?: string
           price?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "packages_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payments: {
         Row: {
           amount: number
+          club_id: string
           created_at: string
           created_by: string | null
           id: string
@@ -97,6 +144,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          club_id: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -108,6 +156,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          club_id?: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -118,6 +167,13 @@ export type Database = {
           subscription_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "payments_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payments_member_id_fkey"
             columns: ["member_id"]
@@ -136,27 +192,39 @@ export type Database = {
       }
       profiles: {
         Row: {
+          club_id: string
           created_at: string
           email: string | null
           full_name: string
           id: string
         }
         Insert: {
+          club_id: string
           created_at?: string
           email?: string | null
           full_name?: string
           id: string
         }
         Update: {
+          club_id?: string
           created_at?: string
           email?: string | null
           full_name?: string
           id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {
+          club_id: string
           created_at: string
           created_by: string | null
           end_date: string
@@ -167,6 +235,7 @@ export type Database = {
           status: string
         }
         Insert: {
+          club_id: string
           created_at?: string
           created_by?: string | null
           end_date: string
@@ -177,6 +246,7 @@ export type Database = {
           status?: string
         }
         Update: {
+          club_id?: string
           created_at?: string
           created_by?: string | null
           end_date?: string
@@ -187,6 +257,13 @@ export type Database = {
           status?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "subscriptions_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "subscriptions_member_id_fkey"
             columns: ["member_id"]
@@ -205,30 +282,42 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          club_id: string
           created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
+          club_id: string
           created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
+          club_id?: string
           created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_club_id_fkey"
+            columns: ["club_id"]
+            isOneToOne: false
+            referencedRelation: "clubs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_user_club_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

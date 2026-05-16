@@ -8,6 +8,8 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
+  const [clubId, setClubId] = useState<string | null>(null);
+  const [clubCode, setClubCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,6 +19,8 @@ export function useAuth() {
       if (!currentUser) {
         if (!cancelled) {
           setRole(null);
+          setClubId(null);
+          setClubCode(null);
           setLoading(false);
         }
         return;
@@ -24,12 +28,14 @@ export function useAuth() {
 
       const { data } = await supabase
         .from("user_roles")
-        .select("role")
+        .select("role, club_id, clubs(code)")
         .eq("user_id", currentUser.id)
         .maybeSingle();
 
       if (!cancelled) {
         setRole((data?.role as AppRole) ?? null);
+        setClubId(data?.club_id ?? null);
+        setClubCode(((data?.clubs as { code?: string } | null)?.code) ?? null);
         setLoading(false);
       }
     };
@@ -53,5 +59,5 @@ export function useAuth() {
     };
   }, []);
 
-  return { session, user, role, loading, isAdmin: role === "admin" };
+  return { session, user, role, clubId, clubCode, loading, isAdmin: role === "admin" };
 }

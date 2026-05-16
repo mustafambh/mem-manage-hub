@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useState } from "react";
 import { CalendarCheck, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/use-auth";
 
 const STATUS_LABELS: Record<string, string> = {
   active: "نشط",
@@ -25,6 +26,7 @@ export const Route = createFileRoute("/_authenticated/subscriptions")({
 });
 
 function SubscriptionsPage() {
+  const { clubId } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ member_id: "", package_id: "", start_date: new Date().toISOString().slice(0, 10), record_payment: true, method: "cash" });
@@ -68,6 +70,7 @@ function SubscriptionsPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!clubId) return toast.error("لم يتم تحديد النادي");
     const pkg = packages.find((p: any) => p.id === form.package_id);
     if (!pkg) return toast.error("اختر باقة");
     const start = new Date(form.start_date);
@@ -81,6 +84,7 @@ function SubscriptionsPage() {
       end_date: end.toISOString().slice(0, 10),
       status: "active",
       created_by: user?.id,
+      club_id: clubId,
     }).select().single();
     if (error) return toast.error(error.message);
 
@@ -92,6 +96,7 @@ function SubscriptionsPage() {
         method: form.method,
         status: "completed",
         created_by: user?.id,
+        club_id: clubId,
       });
     }
 
