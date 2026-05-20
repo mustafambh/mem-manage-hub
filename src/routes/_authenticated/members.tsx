@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useState } from "react";
 import { Search, Users } from "lucide-react";
 import { MemberFormDialog } from "@/components/MemberFormDialog";
+import { MemberStatusDialog } from "@/components/MemberStatusDialog";
 
 export const Route = createFileRoute("/_authenticated/members")({
   component: MembersPage,
@@ -72,13 +73,14 @@ function MembersPage() {
                 <TableHead className="text-right">البريد</TableHead>
                 <TableHead className="text-right">تاريخ الميلاد</TableHead>
                 <TableHead className="text-right">الحالة</TableHead>
+                <TableHead className="text-right">إجراءات</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">جارٍ التحميل...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">جارٍ التحميل...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">لا يوجد أعضاء</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">لا يوجد أعضاء</TableCell></TableRow>
               ) : (
                 filtered.map((m: any) => {
                   const s = STATUS_LABELS[m.status] ?? STATUS_LABELS.active;
@@ -90,6 +92,9 @@ function MembersPage() {
                       <TableCell>{m.birth_date ?? "—"}</TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${s.cls}`}>{s.label}</span>
+                      </TableCell>
+                      <TableCell>
+                        <MemberStatusDialog member={{ id: m.id, full_name: m.full_name, status: m.status }} />
                       </TableCell>
                     </TableRow>
                   );
