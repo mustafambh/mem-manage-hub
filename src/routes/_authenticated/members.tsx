@@ -93,6 +93,9 @@ function MembersPage() {
                       <TableCell>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${s.cls}`}>{s.label}</span>
                       </TableCell>
+                      <TableCell>
+                        <MemberStatusDialog member={{ id: m.id, full_name: m.full_name, status: m.status }} />
+                      </TableCell>
                     </TableRow>
                   );
                 })
