@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       clubs: {
         Row: {
+          alert_days_before: number
           code: string
           created_at: string
           id: string
@@ -23,6 +24,7 @@ export type Database = {
           name: string
         }
         Insert: {
+          alert_days_before?: number
           code: string
           created_at?: string
           id?: string
@@ -30,6 +32,7 @@ export type Database = {
           name: string
         }
         Update: {
+          alert_days_before?: number
           code?: string
           created_at?: string
           id?: string
@@ -221,6 +224,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscription_alerts: {
+        Row: {
+          club_id: string
+          created_at: string
+          days_remaining: number
+          end_date: string
+          id: string
+          member_id: string
+          note: string | null
+          notified_by: string | null
+          subscription_id: string
+        }
+        Insert: {
+          club_id: string
+          created_at?: string
+          days_remaining: number
+          end_date: string
+          id?: string
+          member_id: string
+          note?: string | null
+          notified_by?: string | null
+          subscription_id: string
+        }
+        Update: {
+          club_id?: string
+          created_at?: string
+          days_remaining?: number
+          end_date?: string
+          id?: string
+          member_id?: string
+          note?: string | null
+          notified_by?: string | null
+          subscription_id?: string
+        }
+        Relationships: []
       }
       subscriptions: {
         Row: {
