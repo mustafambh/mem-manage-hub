@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useState } from "react";
 import { Search, Users } from "lucide-react";
 import { MemberFormDialog } from "@/components/MemberFormDialog";
+import { MemberStatusDialog } from "@/components/MemberStatusDialog";
 
 export const Route = createFileRoute("/_authenticated/members")({
   component: MembersPage,
