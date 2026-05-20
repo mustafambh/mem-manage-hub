@@ -23,10 +23,22 @@ export function MemberStatusDialog({ member }: { member: { id: string; full_name
   const save = async () => {
     setLoading(true);
     const { error } = await supabase.from("members").update({ status }).eq("id", member.id);
+    if (error) { setLoading(false); return toast.error(error.message); }
+
+    // مزامنة حالة الاشتراكات النشطة مع حالة العضو
+    const subStatus = status === "frozen" ? "frozen" : status === "inactive" ? "cancelled" : "active";
+    const filterStatuses = status === "active" ? ["frozen"] : ["active", "frozen"];
+    const { error: subErr } = await supabase
+      .from("subscriptions")
+      .update({ status: subStatus })
+      .eq("member_id", member.id)
+      .in("status", filterStatuses);
+
     setLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success("تم تحديث الحالة");
+    if (subErr) return toast.error(subErr.message);
+    toast.success("تم تحديث الحالة والاشتراكات");
     qc.invalidateQueries({ queryKey: ["members"] });
+    qc.invalidateQueries({ queryKey: ["subscriptions"] });
     qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
     setConfirmOpen(false);
     setOpen(false);
