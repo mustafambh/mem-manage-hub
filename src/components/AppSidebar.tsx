@@ -36,6 +36,7 @@ const mainItems = [
 
 const adminItems = [
   { title: "الباقات", url: "/packages", icon: Package },
+  { title: "التنبيهات", url: "/alerts", icon: Bell },
   { title: "الموظفين", url: "/staff", icon: UserCog },
   { title: "التقارير", url: "/reports", icon: BarChart3 },
 ];
