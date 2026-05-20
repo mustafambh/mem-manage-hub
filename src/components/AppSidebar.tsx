@@ -9,6 +9,7 @@ import {
   BarChart3,
   LogOut,
   Activity,
+  Bell,
 } from "lucide-react";
 import {
   Sidebar,
